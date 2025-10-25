@@ -6,10 +6,10 @@ import time
 st.set_page_config(page_title="💬 Chatbot", layout="wide")
 
 # 제목과 설명
-st.title("💬 Chatbot")
+st.title("💬 나의 첫번째 봇")
 st.write(
-    "This is a simple chatbot that uses OpenAI's GPT model to generate responses. "
-    "To use this app, you need to provide an OpenAI API key, which you can get [here](https://platform.openai.com/account/api-keys)."
+    "이는 OpenAI의 GPT 모델을 사용하여 응답을 생성하는 간단한 챗봇입니다. "
+    "이 앱을 사용하려면 OpenAI API 키를 제공해야 합니다. [here](https://platform.openai.com/account/api-keys)."
 )
 
 # 사이드바 설정

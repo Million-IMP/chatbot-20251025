@@ -123,14 +123,29 @@ st.markdown("---")
 # 사이드바 설정
 with st.sidebar:
     st.header("⚙️ Settings")
-    
-    # secrets.toml에서 API 키 자동 로드
+
+    # API 키 설정
+    st.subheader("🔑 API Key")
+
+    # secrets.toml에서 API 키 자동 로드 시도
+    api_key_from_secrets = None
     try:
-        openai_api_key = st.secrets["OPENAI_API_KEY"]
+        api_key_from_secrets = st.secrets["OPENAI_API_KEY"]
         st.success("✅ API Key loaded from secrets.toml", icon="🔑")
-    except KeyError:
-        st.error("❌ OPENAI_API_KEY not found in secrets.toml", icon="🔑")
-        openai_api_key = None
+    except (KeyError, FileNotFoundError):
+        st.info("💡 secrets.toml 파일이 없습니다. 아래에 API 키를 직접 입력하세요.", icon="ℹ️")
+
+    # 사용자 입력 필드
+    user_api_key = st.text_input(
+        "OpenAI API Key",
+        type="password",
+        placeholder="sk-...",
+        help="OpenAI API 키를 입력하세요. https://platform.openai.com/api-keys 에서 발급받을 수 있습니다.",
+        value=""
+    )
+
+    # API 키 우선순위: 사용자 입력 > secrets.toml
+    openai_api_key = user_api_key if user_api_key else api_key_from_secrets
     
     # 모델 선택
     model = st.selectbox(
@@ -167,7 +182,19 @@ with st.sidebar:
 
 # API 키 확인
 if not openai_api_key:
-    st.info("⚠️ Please configure your OpenAI API key in .streamlit/secrets.toml", icon="🗝️")
+    st.warning("⚠️ OpenAI API 키가 필요합니다!", icon="🗝️")
+    st.info("""
+    **API 키를 입력하는 방법:**
+
+    1. 좌측 사이드바의 'OpenAI API Key' 필드에 직접 입력하거나
+    2. `.streamlit/secrets.toml` 파일에 다음과 같이 설정하세요:
+
+    ```toml
+    OPENAI_API_KEY = "sk-your-api-key-here"
+    ```
+
+    API 키는 [OpenAI Platform](https://platform.openai.com/api-keys)에서 발급받을 수 있습니다.
+    """, icon="💡")
 else:
     try:
         # OpenAI 클라이언트 생성

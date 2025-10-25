@@ -3,21 +3,134 @@ from openai import OpenAI, APIError, APIConnectionError, RateLimitError
 import time
 
 # 페이지 설정
-st.set_page_config(page_title="💬 Chatbot", layout="wide")
+st.set_page_config(page_title="나의 첫번째 챗봇", layout="wide", initial_sidebar_state="expanded")
+
+# 커스텀 CSS 스타일
+st.markdown("""
+    <style>
+        .main-title {
+            text-align: center;
+            font-size: 3.5em;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5em;
+            animation: fadeIn 1s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 2em;
+            font-weight: 500;
+        }
+        
+        .description-box {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-left: 4px solid #667eea;
+            padding: 1.5em;
+            border-radius: 8px;
+            margin-bottom: 2em;
+            font-size: 1.05em;
+            line-height: 1.6;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1em;
+            margin-top: 1.5em;
+        }
+        
+        .feature-item {
+            background: white;
+            padding: 1em;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+        }
+        
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 0.5em;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
 # 제목과 설명
-st.title("💬 나의 첫번째 봇")
-st.write(
-    "이는 OpenAI의 GPT 모델을 사용하여 응답을 생성하는 간단한 챗봇입니다. "
-    "이 앱을 사용하려면 OpenAI API 키를 제공해야 합니다. [here](https://platform.openai.com/account/api-keys)."
-)
+st.markdown('<div class="main-title">🚀 나의 첫번째 챗봇</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">AI와 대화하며 새로운 경험을 만들어보세요</div>', unsafe_allow_html=True)
+
+# 설명 박스
+st.markdown("""
+    <div class="description-box">
+        <b>✨ 당신의 AI 어시스턴트에 오신 것을 환영합니다!</b><br><br>
+        이 챗봇은 OpenAI의 최신 GPT 모델을 활용하여 당신의 질문에 즉시 답변하고, 
+        창의적인 작업을 도와주며, 복잡한 개념을 쉽게 설명해줍니다.<br><br>
+        <b>🎯 지금 바로 시작해보세요!</b>
+    </div>
+""", unsafe_allow_html=True)
+
+# 기능 소개
+col1, col2 = st.columns(2)
+with col1:
+    st.markdown("""
+        <div class="feature-item">
+            <div class="feature-icon">💡</div>
+            <b>똑똑한 응답</b><br>
+            최신 AI 기술이 당신의 질문을 완벽하게 이해하고 정확한 답변을 제공합니다.
+        </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    st.markdown("""
+        <div class="feature-item">
+            <div class="feature-icon">⚡</div>
+            <b>실시간 응답</b><br>
+            AI의 대답이 실시간으로 화면에 나타나 빠르고 자연스러운 대화 경험을 제공합니다.
+        </div>
+    """, unsafe_allow_html=True)
+
+col3, col4 = st.columns(2)
+with col3:
+    st.markdown("""
+        <div class="feature-item">
+            <div class="feature-icon">🎨</div>
+            <b>다양한 활용</b><br>
+            글쓰기, 코드 작성, 아이디어 기획, 학습 등 무엇이든 가능합니다.
+        </div>
+    """, unsafe_allow_html=True)
+
+with col4:
+    st.markdown("""
+        <div class="feature-item">
+            <div class="feature-icon">🔒</div>
+            <b>완벽한 보안</b><br>
+            API 키는 안전하게 관리되며, 당신의 개인정보는 철저히 보호됩니다.
+        </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("---")
 
 # 사이드바 설정
 with st.sidebar:
     st.header("⚙️ Settings")
     
-    # API 키 입력
-    openai_api_key = st.text_input("OpenAI API Key", type="password", help="Your OpenAI API key")
+    # secrets.toml에서 API 키 자동 로드
+    try:
+        openai_api_key = st.secrets["OPENAI_API_KEY"]
+        st.success("✅ API Key loaded from secrets.toml", icon="🔑")
+    except KeyError:
+        st.error("❌ OPENAI_API_KEY not found in secrets.toml", icon="🔑")
+        openai_api_key = None
     
     # 모델 선택
     model = st.selectbox(
@@ -54,7 +167,7 @@ with st.sidebar:
 
 # API 키 확인
 if not openai_api_key:
-    st.info("Please add your OpenAI API key in the sidebar to continue.", icon="🗝️")
+    st.info("⚠️ Please configure your OpenAI API key in .streamlit/secrets.toml", icon="🗝️")
 else:
     try:
         # OpenAI 클라이언트 생성
@@ -140,6 +253,6 @@ else:
     # API 키 검증 오류
     except Exception as e:
         st.error(
-            "❌ Invalid OpenAI API key or connection error. Please check your API key and try again.",
+            "❌ Invalid OpenAI API key or connection error. Please check your configuration.",
             icon="🔑"
         )

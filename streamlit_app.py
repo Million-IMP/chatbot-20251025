@@ -123,14 +123,36 @@ st.markdown("---")
 # 사이드바 설정
 with st.sidebar:
     st.header("⚙️ Settings")
-    
-    # secrets.toml에서 API 키 자동 로드
+
+    # API 키 설정
+    st.subheader("🔑 API Key Configuration")
+
+    # secrets.toml에서 API 키 자동 로드 시도
+    api_key_from_secrets = None
     try:
-        openai_api_key = st.secrets["OPENAI_API_KEY"]
-        st.success("✅ API Key loaded from secrets.toml", icon="🔑")
-    except KeyError:
-        st.error("❌ OPENAI_API_KEY not found in secrets.toml", icon="🔑")
-        openai_api_key = None
+        api_key_from_secrets = st.secrets.get("OPENAI_API_KEY", None)
+        if api_key_from_secrets:
+            st.success("✅ API Key loaded from secrets", icon="🔑")
+    except Exception:
+        pass
+
+    # API 키 입력 옵션 제공
+    if not api_key_from_secrets:
+        st.info("💡 Enter your OpenAI API Key below or configure it in Streamlit secrets", icon="🔑")
+        user_input_key = st.text_input(
+            "OpenAI API Key",
+            type="password",
+            help="Get your API key from https://platform.openai.com/api-keys",
+            placeholder="sk-..."
+        )
+        openai_api_key = user_input_key if user_input_key else None
+
+        if openai_api_key:
+            st.success("✅ API Key entered successfully", icon="🔑")
+    else:
+        openai_api_key = api_key_from_secrets
+
+    st.markdown("---")
     
     # 모델 선택
     model = st.selectbox(
@@ -167,7 +189,23 @@ with st.sidebar:
 
 # API 키 확인
 if not openai_api_key:
-    st.info("⚠️ Please configure your OpenAI API key in .streamlit/secrets.toml", icon="🗝️")
+    st.warning("⚠️ API Key Required", icon="🗝️")
+    st.info("""
+        To use this chatbot, you need to configure your OpenAI API key:
+
+        **Option 1: Enter in Sidebar** (Recommended for web deployment)
+        - Enter your API key in the sidebar on the left
+
+        **Option 2: Use Streamlit Secrets** (For Streamlit Cloud)
+        - Go to your app settings in Streamlit Cloud
+        - Add `OPENAI_API_KEY = "your-api-key"` in the Secrets section
+
+        **Option 3: Local secrets.toml** (For local development)
+        - Create `.streamlit/secrets.toml` file
+        - Add `OPENAI_API_KEY = "your-api-key"`
+
+        Get your API key from: https://platform.openai.com/api-keys
+    """)
 else:
     try:
         # OpenAI 클라이언트 생성
